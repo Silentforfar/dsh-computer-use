@@ -13,7 +13,7 @@ A [DSH](https://github.com/deepseek-ai) bundle (DeepSeek Harness plugin).
 1. Open **Plugins** in the DSH Web sidebar, select **More** next to **Experimental plugins**, and switch on **Custom plugin markets**.
 2. Open the **Discover** tab and add this index source:
 
-   `https://raw.githubusercontent.com/Silentforfar/dsh-market-index/main/index.json`
+   `https://silentforfar.github.io/dsh-market-index/index.json`
 
 3. Find **Computer Use** (`@silentforfar/dsh-computer-use`) in the list and press install.
 
