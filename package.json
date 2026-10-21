@@ -1,6 +1,6 @@
 {
   "name": "@silentforfar/dsh-computer-use",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Qoder-style Windows computer use for DSH: window-scoped UI Automation, occlusion-tolerant screenshots, and SendInput actions.",
   "type": "module",
   "license": "MIT",

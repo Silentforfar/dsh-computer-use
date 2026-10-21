@@ -146,17 +146,17 @@ function Get-ElementActions($element) {
   $actions = New-Object System.Collections.Generic.List[string]
   $pattern = $null
   foreach ($entry in @(
-      @{ Name = 'Invoke'; Type = [System.Windows.Automation.InvokePattern] },
-      @{ Name = 'Value'; Type = [System.Windows.Automation.ValuePattern] },
-      @{ Name = 'Toggle'; Type = [System.Windows.Automation.TogglePattern] },
-      @{ Name = 'Select'; Type = [System.Windows.Automation.SelectionItemPattern] },
-      @{ Name = 'ExpandCollapse'; Type = [System.Windows.Automation.ExpandCollapsePattern] },
-      @{ Name = 'Scroll'; Type = [System.Windows.Automation.ScrollPattern] },
-      @{ Name = 'Text'; Type = [System.Windows.Automation.TextPattern] }
+      @{ Name = 'Invoke'; Pattern = [System.Windows.Automation.InvokePattern]::Pattern },
+      @{ Name = 'Value'; Pattern = [System.Windows.Automation.ValuePattern]::Pattern },
+      @{ Name = 'Toggle'; Pattern = [System.Windows.Automation.TogglePattern]::Pattern },
+      @{ Name = 'Select'; Pattern = [System.Windows.Automation.SelectionItemPattern]::Pattern },
+      @{ Name = 'ExpandCollapse'; Pattern = [System.Windows.Automation.ExpandCollapsePattern]::Pattern },
+      @{ Name = 'Scroll'; Pattern = [System.Windows.Automation.ScrollPattern]::Pattern },
+      @{ Name = 'Text'; Pattern = [System.Windows.Automation.TextPattern]::Pattern }
     )) {
     try {
       $pattern = $null
-      if ($element.TryGetCurrentPattern($entry.Type.Pattern, [ref]$pattern)) { $actions.Add($entry.Name) }
+      if ($element.TryGetCurrentPattern($entry.Pattern, [ref]$pattern)) { $actions.Add($entry.Name) }
     } catch { }
   }
   return $actions.ToArray()
@@ -394,27 +394,28 @@ function Invoke-ElementAction([IntPtr]$hwnd, [int]$index) {
   }
   $element = $entry.elements[$index - 1]
   $pattern = $null
-  foreach ($type in @(
-      [System.Windows.Automation.InvokePattern],
-      [System.Windows.Automation.TogglePattern],
-      [System.Windows.Automation.SelectionItemPattern],
-      [System.Windows.Automation.ExpandCollapsePattern]
+  $failures = New-Object System.Collections.Generic.List[string]
+  foreach ($attempt in @(
+      @{ Name = 'InvokePattern'; Pattern = [System.Windows.Automation.InvokePattern]::Pattern },
+      @{ Name = 'TogglePattern'; Pattern = [System.Windows.Automation.TogglePattern]::Pattern },
+      @{ Name = 'SelectionItemPattern'; Pattern = [System.Windows.Automation.SelectionItemPattern]::Pattern },
+      @{ Name = 'ExpandCollapsePattern'; Pattern = [System.Windows.Automation.ExpandCollapsePattern]::Pattern }
     )) {
     try {
       $pattern = $null
-      if (-not $element.TryGetCurrentPattern($type.Pattern, [ref]$pattern)) { continue }
-      switch ($type.Name) {
+      if (-not $element.TryGetCurrentPattern($attempt.Pattern, [ref]$pattern)) { continue }
+      switch ($attempt.Name) {
         'InvokePattern' { $pattern.Invoke(); return 'invoked' }
         'TogglePattern' { $pattern.Toggle(); return 'toggled' }
         'SelectionItemPattern' { $pattern.Select(); return 'selected' }
         'ExpandCollapsePattern' { $pattern.Expand(); return 'expanded' }
       }
-    } catch { }
+    } catch {
+      $failures.Add(($attempt.Name + ': ' + $_.Exception.Message))
+    }
   }
-  $point = $element.GetClickablePoint()
-  Assert-Foreground $hwnd | Out-Null
-  Send-MouseClick ([int]$point.X) ([int]$point.Y) 1 'left'
-  return 'clicked'
+  if ($failures.Count -gt 0) { throw ('element action failed: ' + ($failures -join '; ')) }
+  throw 'element exposes no Invoke/Toggle/SelectionItem/ExpandCollapse pattern; use a screenshot coordinate instead'
 }
 
 function Invoke-Request($method, $params) {

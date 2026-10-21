@@ -27,7 +27,9 @@ git+https://github.com/Silentforfar/dsh-computer-use.git#<commit-sha>
 
 Use a full 40-character commit SHA from this repository's history so the install stays pinned and reproducible.
 
-**Requirements.** Windows 10/11 and DSH 0.2.1-rc.2 or newer. The helper is `cua.ps1`, run through the `pwsh` tool, so every action follows the session permission preset.
+**Requirements.** Windows 10/11 and DSH 0.2.1-rc.2 or newer. The helper is `cua.ps1`, spawned as one long-lived Windows PowerShell process (NDJSON over stdin/stdout) by the plugin itself; the tools follow whatever permission preset the session uses.
+
+**Verified on this machine.** Notepad: screenshot returned as an image, typing `DSH computer use OK` read back through `document_text`. Calculator: UIA element actions produced `1 + 2 = 3` without moving the cursor (`Expression is 1 + 2=`, `Display is 3`).
 
 **License.** MIT. The rest of this README documents the plugin in Chinese.
 
@@ -56,7 +58,18 @@ Use a full 40-character commit SHA from this repository's history so the install
 - 元素动作走 UI Automation（Invoke/Toggle/Select/Expand），不移动真实鼠标、不抢焦点；坐标动作才用 `SendInput`。
 - 元素编号与 `screenshot_id` 只对最近一次观察有效，坐标动作必须带上 `screenshot_id`，由 helper 换算成屏幕坐标。
 - Windows 的键盘/坐标输入要求目标窗口在前台：helper 会先激活目标，激活失败直接报错，而不是把字打到别的窗口。
-- `cua.ps1` 是唯一的进程依赖，通过 `pwsh` 工具调用；`skills/computer-use/SKILL.md` 负责把观察节奏和安全红线讲给模型。
+- `cua.ps1` 是唯一的进程依赖：插件自己拉起一个长驻 Windows PowerShell 进程（stdin/stdout 走 NDJSON），不经过 `pwsh` 工具；`skills/computer-use/SKILL.md` 负责把观察节奏和安全红线讲给模型。
+
+## 已验证
+
+| 场景 | 结果 |
+|---|---|
+| 记事本：截图 | `computer_get_window_state` 返回 2860×1502 的窗口截图（PrintWindow，被遮挡也可拍），图片直接进入模型上下文 |
+| 记事本：输入 | `computer_type_text` 输入 `DSH computer use OK`，`document_text` 读回一致，光标 `Line 1, Column 20` |
+| 计算器：元素动作 | `computer_click` 以 `[Invoke]` 走 UI Automation，`One` → `Plus` → `Two` → `Equals`，得到 `Expression is 1 + 2=`、`Display is 3`，光标未移动 |
+| 前台保护 | 目标不在前台时先激活；激活失败直接报错，不会把输入打到别的窗口 |
+
+未覆盖：UWP 的 `ApplicationFrameHost` 窗口在前台切换上可能不生效；提权窗口受 UIPI 限制；终端类应用按安全边界不自动化。
 
 ## 安全边界
 
