@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Computer Use",
+    "description": "Qoder-style desktop control for DSH: per-window screenshots, UI Automation element trees, and click/type/key/scroll/drag actions bound to a screenshot snapshot."
+  }
+}

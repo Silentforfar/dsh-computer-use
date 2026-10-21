@@ -1,0 +1,48 @@
+{
+  "name": "@silentforfar/dsh-computer-use",
+  "version": "0.1.0",
+  "description": "Qoder-style Windows computer use for DSH: window-scoped UI Automation, occlusion-tolerant screenshots, and SendInput actions.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Silentforfar",
+  "homepage": "https://github.com/Silentforfar/dsh-computer-use#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Silentforfar/dsh-computer-use.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Silentforfar/dsh-computer-use/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "dsh-bundle",
+    "computer-use",
+    "ui-automation",
+    "windows",
+    "desktop",
+    "automation"
+  ],
+  "engines": {
+    "dsh": ">=0.2.1-rc.2"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "cua.ps1",
+    "skills/computer-use/SKILL.md",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
